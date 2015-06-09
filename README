@@ -1,4 +1,5 @@
 Use as you please.
+
 You need create your strategy like object below::
 ```javascript
 var MyStrategy = function() {
