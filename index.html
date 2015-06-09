@@ -25,7 +25,8 @@ https://github.com/mleibman/SlickGrid
     Scope variable specified by ng-array will contain an array of arrays of the
     tabular data
     -->
-    <angular-paste ng-model="rawPaste" ng-array="parsedPaste"/>
+    <angular-paste ng-model="rawPaste" ng-array="parsedPaste" ng-strategy="StrategyA()"/>
+    
     <table class="table table-striped table-bordered">
         <tbody>
         <tr ng-repeat="row in parsedPaste">
