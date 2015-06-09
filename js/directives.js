@@ -1,11 +1,57 @@
 'use strict';
 
 /* Directives */
-
-
 angular.module('myApp.directives', [])
-    .directive('angularPaste', ['$parse', '$document',
+ .directive('angularPaste', ['$parse', '$document',
     function ($parse, $document) {
+        
+        var Strategy = function() {
+            
+            this.strategy = {
+                pattern: function(){ 
+                    return /[\n\f\r]/;
+                }, 
+                action: function(item, scope){ 
+                    return  item.trim().split("\t")[0]; 
+                }
+            };
+
+        };
+
+        Strategy.prototype = {
+            
+            setStrategy: function(strategy) {
+                this.strategy = strategy;
+            },   
+
+            pattern: function() {
+                return this.strategy.pattern();
+            },
+
+            action: function(item, scope){
+                return this.strategy.action(item,scope);
+            },
+
+            finish: function(item, scope){
+                return this.strategy.finish(item, scope);
+            }
+        };
+
+        var config = {
+            idPasteBox: '_AngularPasteBox_' + (new Date()).getTime().toString(),
+            elementPasteBox: null,
+            defaultStrategy: {
+
+                pattern: function(){ 
+                    return /[\n\f\r]/; 
+                }, 
+
+                action: function(item, scope){ 
+                    return  item.trim().split("\t")[0]; 
+                }
+            }
+        }
+
         return {
             restrict:'E',
             link:function (scope, element, attrs) {
@@ -20,16 +66,20 @@ angular.module('myApp.directives', [])
                     var toReturn = [];
 
                     try {
-                        //Pasted data split into rows
-                        var rows = text.split(/[\n\f\r]/);
+
+                        var strategy = new Strategy();
+
+                        strategy.setStrategy(scope.$eval(attrs.ngStrategy) || config.defaultStrategy);
+
+                        var rows = text.split(strategy.pattern());
+
                         rows.forEach(function (thisRow) {
-                            var row = thisRow.trim();
-                            if (row != '') {
-                                var cols = row.split("\t");
-                                toReturn.push(cols);
-                            }
+                           toReturn.push(strategy.action(thisRow, scope));
                         });
 
+                        strategy.finish(rows, scope);
+
+                        toReturn.pop();
                     }
                     catch (err) {
                         console.log('error parsing as tabular data');
@@ -40,21 +90,30 @@ angular.module('myApp.directives', [])
                 }
 
                 function textChanged() {
-                    var text = $('#myPasteBox').val();
+
+                    var text = config.elementPasteBox.val();
+
                     if (text != '') {
                         //We need to change the scope values
                         scope.$apply(function () {
+                            
                             if (attrs.ngModel != undefined && attrs.ngModel != '') {
+
                                 $parse(attrs.ngModel).assign(scope, text);
+
                             }
+
                             if (attrs.ngArray != undefined && attrs.ngArray != '') {
+                            
                                 var asArray = parseTabular(text);
+                            
                                 if (asArray != null) {
                                     $parse(attrs.ngArray).assign(scope, asArray);
-                                }
+                                }                                
                             }
                         });
                     }
+
                 }
 
 
@@ -63,15 +122,24 @@ angular.module('myApp.directives', [])
                     function handleKeyDown(e, args) {
                         if (!inFocus && e.which == keyCodes.V && (e.ctrlKey || e.metaKey)) {    // CTRL + V
                             //reset value of our box
-                            $('#myPasteBox').val('');
+                            config.elementPasteBox.val('');
                             //set it in focus so that pasted text goes inside the box
-                            $('#myPasteBox').focus();
+                            config.elementPasteBox.focus();
                         }
                     }
 
                     //We add a text area to the body only if it is not already created by another myPaste directive
-                    if ($('#myPasteBox').length == 0) {
-                        $('body').append($('<textarea id=\"myPasteBox\" style=\"position:absolute; left:-1000px; top:-1000px;\"></textarea>'));
+                    if (angular.element(config.idPasteBox).length == 0) {
+
+                        config.elementPasteBox = angular.element('<textarea>');
+                        config.elementPasteBox.attr('id', config.idPasteBox);
+                        config.elementPasteBox.css({
+                            position: 'absolute',
+                            left: '-1000px',
+                            top: '-1000px'
+                        });
+
+                        angular.element('body').append(config.elementPasteBox);
 
                         var keyCodes = {
                             'C':67,
@@ -81,26 +149,26 @@ angular.module('myApp.directives', [])
                         //Setup live functions for focus check
                         //(we don't want to steal text if user is already
                         //focussed on a text element)
-                        $('input, textarea').live("focus", function () {
+                        angular.element('input, textarea').live("focus", function () {
                             //If this is true, we wont respond to Ctrl + V
                             inFocus = true;
                         });
 
-                        $('input, textarea').live("blur", function () {
+                        angular.element('input, textarea').live("blur", function () {
                             //We are not on a text element so we will respond
                             //to Ctrl + V
                             inFocus = false;
                         });
 
                         //Handle the key down event
-                        $(document).keydown(handleKeyDown);
+                        angular.element(document).keydown(handleKeyDown);
 
                         //We will respond to when the textbox value changes
-                        $('#myPasteBox').bind('input propertychange', textChanged);
+                        config.elementPasteBox.bind('input propertychange', textChanged);
                     }
                     else {
                         //We will respond to when the textbox value changes
-                        $('#myPasteBox').bind('input propertychange', textChanged);
+                        config.elementPasteBox.bind('input propertychange', textChanged);
                     }
                 });
             }
