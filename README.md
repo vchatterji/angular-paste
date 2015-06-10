@@ -39,3 +39,6 @@ Add this directive in your Layout page:
 ```html
 <script src="js/directives.js"></script>
 ```
+Visit this jsfiddle below to see this directive in action:
+
+[Visit jsfiddle!](http://jsfiddle.net/jeffersonpereira/eh5cov3k/2/)
