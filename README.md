@@ -41,4 +41,4 @@ Add this directive in your Layout page:
 ```
 Visit this jsfiddle below to see this directive in action:
 
-[Visit jsfiddle!](http://jsfiddle.net/jeffersonpereira/eh5cov3k/2/)
+[Visit jsfiddle!](https://jsfiddle.net/3agnwfz4/2/)
