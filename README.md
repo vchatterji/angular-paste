@@ -1,6 +1,6 @@
 Use as you please.
 
-You need create your strategy like object below:
+You need to create your strategy object like shown below:
 
 ```js
 var MyStrategy = function() {
@@ -21,14 +21,14 @@ var MyStrategy = function() {
 	    }
 	};
 ```
-In your scope you need create an function to set his strategy:
+In your scope you need create a function to set the strategy:
 
 ```js
 $scope.StrategyA = function(){
 	return new MyStrategy();
 };
 ````
-Put it in your html file:
+And add this to your HTML file:
 
 ```html
 <angular-paste ng-model="rawPaste" ng-array="parsedPaste" ng-strategy="StrategyA()"/>
@@ -41,4 +41,4 @@ Add this directive in your Layout page:
 ```
 Visit this jsfiddle below to see this directive in action:
 
-[Visit jsfiddle!](https://jsfiddle.net/3agnwfz4/2/)
+[Visit jsfiddle!](http://jsfiddle.net/3agnwfz4/5/)
