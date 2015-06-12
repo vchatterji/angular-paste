@@ -5,17 +5,32 @@ You need to create your strategy object like shown below:
 ```js
 var MyStrategy = function() {
       
-      //Hist regex pattern for split function
+     	//The Regex to split data into actionable items
 	    this.pattern = function() {	    
 	        return /[\n\f\r]/;
 	    };
 
-      //His action before each object
+      	//The action per item to return one row of data
 	    this.action = function(item, $scope){
-    		return item.split("\t")[0];
+	    	//You could even return selected colums like the following
+	    	/*
+	    	//We will select some columns to return
+	    	var selectedData = [];
+
+	    	//The parsed data from the paste
+	    	var parsedData = item.split("\t");
+
+	    	//Below we add the 1st and third column from our data
+	    	selectedData.push(parsedData[0]);
+	    	selectedData.push(parsedData[2]);
+
+	    	//And return it.
+	    	return selectedData;
+	    	*/
+    		return item.split("\t");
 	    }
      
-      //His last event when all values have been analyzed by the split function
+      	//The function that will be called after all the actionable items are processed
 	    this.finish = function(item, $scope){
 	    	console.log("finish", item);
 	    }
